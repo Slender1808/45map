@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script>
+      async function addImageProcess(src) {
+        return new Promise((resolve, reject) => {
+          let img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+          img.crossOrigin = "Anonymous";
+        });
+      }
+
+      //start();
+      async function start() {
+        //https://khms1.googleapis.com/kh?v=90&deg=0&x=1134900&y=864700&z=21
+        //https://khms3.googleapis.com/kh?v=90&deg=0&x=1134900&y=864700&z=21
+        //https://t.ssl.ak.tiles.virtualearth.net/tiles/be00032330001133001030?g=11124
+        //https://www.bing.com/maps?osid=27f2bd4e-c5de-4bd1-ba65-f7aa740dda43&cp=40.697178~14.859056&lvl=20&style=v&imgid=ccac4449-9ec5-420d-9cbb-5047883cf16d&v=2&sV=2&form=S00027
+        
+        let canvas = document.querySelector("canvas");
+        canvas.width = 8192;
+        canvas.height = 8192;
+        let ctxCanvas = canvas.getContext("2d");
+        let ctx = new OffscreenCanvas(8192, 8192).getContext("2d");
+
+        let x = 1134900;
+        let y = 864700;
+        let tmpY = y;
+        let indexX = 0;
+        let indexY = 0;
+
+        for (indexX = 0; indexX < 32; indexX++) {
+          for (let indexY = 0; indexY < 32; indexY++) {
+            let img = await addImageProcess(
+              `https://khms${
+                (indexX % 3) + 1
+              }.googleapis.com/kh?v=90&deg=0&x=${x}&y=${tmpY}&z=21`
+            );
+            tmpY++;
+            ctx.drawImage(img, indexX * 256, indexY * 256, 256, 256);
+          }
+          tmpY = y;
+          x++;
+        }
+
+        //ctxCanvas.putImageData(ctx, 0, 0);
+        ctxCanvas.putImageData(ctx.getImageData(0, 0, 8192, 8192), 0, 0);
+        //const url = ctxCanvas.toDataURL();
+        //window.open(url, "Download");
+      }
+    </script>
+  </body>
+</html>
